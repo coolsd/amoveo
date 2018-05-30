@@ -1,6 +1,6 @@
 //make ip and port as input things.
 
-local_ip = [127,0,0,1];
+local_ip = [192,168,13,16];
 local_port = 8081;
 var server_ip = document.createElement("INPUT");
 server_ip.setAttribute("type", "text");
