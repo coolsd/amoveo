@@ -144,12 +144,12 @@ remote_peer(Transaction, Peer) ->
         {ok, Return0} -> Return0;
 	bad_peer -> %remove from peers, add to a black list for next N minutes.
 	    {{_,_,_,_},_} = Peer,
-	    io:fwrite("removing peer "),
-	    io:fwrite(packer:pack(Peer)),
-	    io:fwrite("\n"),
-	    io:fwrite("command was "),
-	    io:fwrite(element(1, Transaction)),
-	    io:fwrite("\n"),
+	    %io:fwrite("removing peer "),
+	    %io:fwrite(packer:pack(Peer)),
+	    %io:fwrite("\n"),
+	    %io:fwrite("command was "),
+	    %io:fwrite(element(1, Transaction)),
+	    %io:fwrite("\n"),
 	    blacklist_peer:add(Peer),
 	    peers:remove(Peer),
 	    error;
@@ -298,6 +298,8 @@ push_new_block(Block) ->
     {ok, FT} = application:get_env(amoveo_core, fork_tolerance),
     M = min(Header#header.height, FT),
     Headers = list_headers([Header], M),
+    {ok, Pools} = application:get_env(amoveo_core, pools),
+    spawn(fun() -> push_new_block_helper(0, 0, shuffle(Pools), Hash, Headers) end),
     spawn(fun() -> push_new_block_helper(0, 0, shuffle(Peers), Hash, Headers) end).
 push_new_block_helper(_, _, [], _, _) -> ok;%no one else to give the block to.
 push_new_block_helper(N, M, _, _, _) when ((M > 1) and ((N*2) > (M*1))) -> ok;%the majority of peers probably already know.

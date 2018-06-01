@@ -16,6 +16,12 @@ height(1) ->
 block(1, N) ->
     B = block:get_by_height(N),
     B#block.txs;
+block(3, N) ->
+    Txs = tl(block(1, N)),
+    Txids = lists:map(
+	      fun(Tx) -> hash:doit(testnet_sign:data(Tx)) end, 
+	      Txs),
+    [Txs, Txids];
 block(2, H) ->
     block:get_by_hash(H).
 top() ->
@@ -39,8 +45,8 @@ tx_maker0(Tx) ->
 		%			    timer:sleep(200),
 		%			    spawn(fun() -> talker:talk({txs, [Stx]}, P) end) end, Peers)
 		%	  end),
-	    ok
-			      
+	    %ok
+	    hash:doit(Tx)
     end.
 create_account(NewAddr, Amount) ->
     Cost = trees:dict_tree_get(governance, create_acc_tx),
@@ -551,7 +557,12 @@ mining_data() ->
      crypto:strong_rand_bytes(Entropy), 
      %headers:difficulty_should_be(Top)].
      Block#block.difficulty].
-
+sync_normal() ->
+    sync_mode:normal(),
+    0.
+sync_quick() ->
+    sync_mode:quick(),
+    0.
    
 mining_data(X) ->
     mining_data(X, 30).
